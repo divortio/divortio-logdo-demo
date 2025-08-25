@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogDO by Divortio - Demo</title>
+    <meta name="description" content="LogDO by Divortio - Demo">
+
+    <link rel="icon" href="./assets/images/icons/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="./assets/images/icons/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/images/icons/apple-touch-icon.png">
+    <link rel="manifest" href="./assets/site.webmanifest">
+    <link rel="mask-icon" href="./assets/images/icons/safari-pinned-tab.svg" color="#02040a">
+    <meta name="msapplication-TileColor" content="#02040a">
+    <meta name="theme-color" content="#ffffff">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.divort.io/">
+    <meta property="og:title" content="Divortio - A beacon through the fog of a high-conflict divorce.">
+    <meta property="og:description" content="A beacon for those navigating the fog of a high-conflict divorce.">
+    <meta property="og:image" content="https://www.divort.io/assets/images/banners/divortio-og-banner-1200x630.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.divort.io/">
+    <meta property="twitter:title" content="Divortio - A beacon through the fog of a high-conflict divorce.">
+    <meta property="twitter:description" content="A beacon for those navigating the fog of a high-conflict divorce.">
+    <meta property="twitter:image"
+          content="https://www.divort.io/assets/images/banners/divortio-og-banner-1200x630.png">
+
+    <script src="./vendor/js/tailwindcss.js"></script>
+    <style>
+        @import url("./vendor/fonts/google-fonts.css");
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #02040a;
+            color: #e6edf3;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .logo-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        #hero-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .data-card {
+            background-color: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .data-key {
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .data-value, .data-table {
+            color: #e5e7eb;
+            word-break: break-all;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem;
+        }
+
+        .data-table th {
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .group-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            font-style: italic;
+            color: #60a5fa;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .group-title:first-of-type {
+            margin-top: 0;
+        }
+
+        #hero-logo span {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .tab-button {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #9ca3af;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease-in-out;
+            white-space: nowrap;
+        }
+
+        .tab-button.active {
+            background-color: #60a5fa;
+            color: #02040a;
+            font-weight: 600;
+            border-color: #60a5fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-container {
+            overflow-x: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .tab-container::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+<canvas id="hero-canvas"></canvas>
+<div class="content-wrapper container mx-auto max-w-7xl">
+    <header class="mb-12 text-center">
+        <h1 class="logo-font text-5xl md:text-6xl text-white">LogDO</h1>
+        <p class="text-lg md:text-xl mt-4 text-gray-400 italic" id="hero-logo">
+            by
+            <span>D</span><span>i</span><span>v</span><span>o</span><span>r</span><span>t</span><span>i</span><span>o</span>
+        </p>
+    </header>
+
+    <main class="data-card rounded-xl p-6 sm:p-8">
+        <div id="log-container">
+            <!-- Log data will be dynamically rendered here -->
+        </div>
+    </main>
+
+    <footer class="text-center py-8 mt-8">
+        <p class="text-gray-500">&copy; 2025 Divortio. All rights reserved.</p>
+    </footer>
+</div>
+
+<!-- The Worker will inject the logData object into this script tag -->
+<script id="log-data-script"></script>
+
+<script>
+    // --- PUSHID DECODER LIBRARY ---
+    const pushIDDecoder = (function () {
+        const PUSH_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz~';
+        const CHARS_MAP = {};
+        for (let i = 0; i < PUSH_CHARS.length; i++) CHARS_MAP[PUSH_CHARS[i]] = i;
+
+        function decodeTime(id) {
+            if (typeof id !== 'string' || id.length < 8) return null;
+            const timeStr = id.substring(0, 8);
+            let timestamp = 0;
+            for (let i = 0; i < timeStr.length; i++) {
+                const charValue = CHARS_MAP[timeStr[i]];
+                if (charValue === undefined) return null;
+                timestamp = timestamp * 64 + charValue;
+            }
+            return timestamp;
+        }
+
+        return {decodeTime};
+    })();
+
+    // --- DATA MAPPING & RENDERING LOGIC ---
+    // This script now runs on the client-side, using the data injected by the Worker.
+    const DATA_MAP = {
+        "Log": {
+            logId: "Log ID",
+            receivedAt: "Received At",
+            processedAt: "Processed At",
+            processingDurationMs: "Processing Time (ms)"
+        },
+        "Client": {
+            "Identity": {cId: "Client ID", firstVisited: "First Visited", clientAge: "Client Age"},
+            "Session": {sId: "Session ID", sessionStarted: "Session Started", sessionDuration: "Session Duration"},
+            "Event": {eId: "Event ID", eventTime: "Event Time"},
+            "Fingerprint": {
+                fpID: "Browser ID",
+                deviceHash: "Device ID",
+                sessionHash: "Connection ID",
+                tlsHash: "TLS ID",
+                ja3Hash: "JA3 ID",
+                clientDeviceType: "Device Type"
+            }
+        },
+        "Request": {
+            "Top-Level": {
+                rayId: "Ray ID",
+                requestTime: "Request Time",
+                requestMethod: "Method",
+                requestMimeType: "MIME Type",
+                sessionBin10: "Decile",
+                sessionBin100: "Percentile"
+            },
+            "URL": {requestUrl: "Full URL", urlDomain: "Domain", urlPath: "Path", urlQuery: "Parameters"},
+            "Headers": {requestHeaders: "Headers", headerBytes: "Header Bytes"},
+            "Cookies": {clientCookies: "Cookies"},
+            "Body": {requestBody: "Body", bodyBytes: "Body Bytes", bodyTruncated: "Body Truncated"}
+        },
+        "Connection": {
+            "Server": {
+                serverId: "Server ID",
+                cfColo: "Cloudflare Colo",
+                edgeServerIp: "Edge IP",
+                edgeServerPort: "Edge Port",
+                zoneName: "Zone Name",
+                queueTime: "Edge Processing Time (ms)"
+            },
+            "IP": {
+                clientIp: "IP Address",
+                clientPort: "Port",
+                clientTcpRtt: "Ping (ms)",
+                cfAsn: "ASN",
+                cfAsOrganization: "AS Organization"
+            },
+            "GeoIP": {
+                geoId: "Geo ID",
+                cfContinent: "Continent",
+                cfCountry: "Country",
+                cfRegion: "Region",
+                cfCity: "City",
+                cfPostalCode: "Postal Code",
+                cfTimezone: "Timezone",
+                coordinates: "Coordinates"
+            },
+            "TLS": {cfTlsVersion: "TLS Version", cfTlsCipher: "TLS Cipher", cfHttpProtocol: "HTTP Protocol"},
+            "Bot": {
+                threatScore: "Threat Score",
+                threatCategory: "Threat Category",
+                verifiedBot: "Verified Bot",
+                wafScore: "WAF Score"
+            }
+        }
+    };
+
+    function formatDuration(ms) {
+        if (ms < 0) ms = 0;
+        const totalSeconds = Math.floor(ms / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = String(Math.floor((totalSeconds % 86400) / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        if (days > 0) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function renderLogData(logDataToRender) {
+        const container = document.getElementById('log-container');
+        if (!container) return;
+
+        const clientTimestamp = pushIDDecoder.decodeTime(logDataToRender.cId);
+        const sessionTimestamp = pushIDDecoder.decodeTime(logDataToRender.sId);
+        const eventTimestamp = pushIDDecoder.decodeTime(logDataToRender.eId);
+
+        const enrichedData = {...logDataToRender};
+
+        if (clientTimestamp) {
+            enrichedData.firstVisited = new Date(clientTimestamp).toISOString();
+            enrichedData.clientAge = formatDuration(Date.now() - clientTimestamp);
+        }
+        if (sessionTimestamp) {
+            enrichedData.sessionStarted = new Date(sessionTimestamp).toISOString();
+            if (eventTimestamp) {
+                enrichedData.sessionDuration = formatDuration(eventTimestamp - sessionTimestamp);
+            }
+        }
+        if (eventTimestamp) {
+            enrichedData.eventTime = new Date(eventTimestamp).toISOString();
+        }
+        enrichedData.coordinates = `${logDataToRender.cfLatitude || 'N/A'}, ${logDataToRender.cfLongitude || 'N/A'}`;
+
+        let html = '<div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12">';
+
+        html += '<div>';
+        html += renderGroup("Log", DATA_MAP.Log, enrichedData);
+        html += renderTabbedGroup("Client", DATA_MAP.Client, enrichedData);
+        html += '</div>';
+
+        html += '<div>';
+        html += renderTabbedGroup("Connection", DATA_MAP.Connection, enrichedData);
+        html += renderTabbedGroup("Request", DATA_MAP.Request, enrichedData, "Top-Level");
+        html += '</div>';
+
+        html += '</div>';
+        container.innerHTML = html;
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const tabGroup = e.currentTarget.dataset.tabGroup;
+                const tab = e.currentTarget.dataset.tab;
+
+                document.querySelectorAll(`.tab-button[data-tab-group="${tabGroup}"]`).forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+
+                document.querySelectorAll(`.tab-content[data-tab-group="${tabGroup}"]`).forEach(c => c.classList.remove('active'));
+                document.querySelector(`.tab-content[data-tab-group="${tabGroup}"][data-tab="${tab}"]`).classList.add('active');
+            });
+        });
+    }
+
+    function renderGroup(groupName, groupContent, data) {
+        let groupHtml = `<h2 class="group-title text-2xl">${groupName}</h2>`;
+        groupHtml += '<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">';
+        groupHtml += renderFields(groupContent, data);
+        groupHtml += '</div>';
+        return groupHtml;
+    }
+
+    function renderTabbedGroup(groupName, groupContent, data, topLevelKey = null) {
+        let groupHtml = `<h2 class="group-title text-2xl">${groupName}</h2>`;
+
+        if (topLevelKey && groupContent[topLevelKey]) {
+            groupHtml += '<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">';
+            groupHtml += renderFields(groupContent[topLevelKey], data);
+            groupHtml += '</div>';
+        }
+
+        groupHtml += `<div class="mt-4">
+                <div class="flex border-b border-gray-700 tab-container">`;
+
+        let firstTab = true;
+        for (const subGroupName in groupContent) {
+            if (subGroupName === topLevelKey) continue;
+            const activeClass = firstTab ? 'active' : '';
+            groupHtml += `<button class="tab-button rounded-t-md ${activeClass}" data-tab-group="${groupName.toLowerCase()}" data-tab="${subGroupName.toLowerCase()}">${subGroupName}</button>`;
+            firstTab = false;
+        }
+        groupHtml += `</div>
+                <div class="p-4 border border-t-0 border-gray-700 rounded-b-md">`;
+
+        firstTab = true;
+        for (const subGroupName in groupContent) {
+            if (subGroupName === topLevelKey) continue;
+            const activeClass = firstTab ? 'active' : '';
+            groupHtml += `<div class="tab-content ${activeClass}" data-tab-group="${groupName.toLowerCase()}" data-tab="${subGroupName.toLowerCase()}">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">${renderFields(groupContent[subGroupName], data)}</div>
+                              </div>`;
+            firstTab = false;
+        }
+        groupHtml += `</div></div>`;
+        return groupHtml;
+    }
+
+    function renderFields(fields, data) {
+        let fieldsHtml = '';
+        for (const key in fields) {
+            const displayName = fields[key];
+            let value = data[key];
+
+            if (value === undefined || value === null || value === '') continue;
+
+            let valueHtml = '';
+            if (key === 'requestTime') {
+                value = new Date(value).toISOString();
+            }
+
+            if (key === 'requestBody' && value) {
+                valueHtml = `<pre class="data-value bg-black bg-opacity-20 p-2 rounded-md mt-1 text-xs">${value}</pre>`;
+            } else if (key === 'requestHeaders' || key === 'clientCookies') {
+                try {
+                    const parsed = JSON.parse(value);
+                    valueHtml = '<table class="data-table w-full mt-1 text-xs"><thead><tr><th>Key</th><th>Value</th></tr></thead><tbody>';
+                    for (const k in parsed) {
+                        valueHtml += `<tr><td>${k}</td><td>${parsed[k]}</td></tr>`;
+                    }
+                    valueHtml += '</tbody></table>';
+                } catch (e) {
+                    valueHtml = `<div class="data-value">${value}</div>`;
+                }
+            } else {
+                valueHtml = `<div class="data-value">${value}</div>`;
+            }
+
+            fieldsHtml += `<div class="col-span-1"><div class="data-key">${displayName}</div>${valueHtml}</div>`;
+        }
+        return fieldsHtml;
+    }
+
+    // The global `logData` variable is injected by the Worker.
+    document.addEventListener('DOMContentLoaded', () => renderLogData(window.logData || {}));
+</script>
+
+<script src="./js/animation.js" defer></script>
+</body>
+</html>

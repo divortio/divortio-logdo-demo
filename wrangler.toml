@@ -1,0 +1,27 @@
+# wrangler.toml
+# Configuration for the Cloudflare Logging Worker.
+# Compatibility: August 2025
+name = "divortio-logdo-demo"
+main = "src/worker.mjs"
+compatibility_date = "2025-08-21"
+
+minify = true
+workers_dev = false
+preview_urls = false
+
+[placement]
+mode = "smart"
+
+[observability]
+enabled = true
+head_sampling = 1.0
+
+# This binding serves your static frontend from the 'public' directory.
+[assets]
+directory = "./public"
+
+# This is the service binding to your existing logger Worker.
+# It allows your inspector to call the `getLogData` method.
+[[services]]
+binding = "LOGGER"
+service = "divortio-log-do"
