@@ -19,9 +19,15 @@ head_sampling = 1.0
 # This binding serves your static frontend from the 'public' directory.
 [assets]
 directory = "./public"
+binding = "ASSETS"
+
+[[routes]]
+pattern = "logdodemo.tools.divort.io"
+custom_domain = true
 
 # This is the service binding to your existing logger Worker.
 # It allows your inspector to call the `getLogData` method.
 [[services]]
 binding = "LOGGER"
 service = "divortio-log-do"
+

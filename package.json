@@ -1,7 +1,7 @@
 {
   "name": "divortio-logdo-demo",
   "version": "1.0.0",
-  "description": "Zero latency logging to Cloudflare D1 from Workers & Durable Objects",
+  "description": "Demo page for divortio-logdo: Zero latency logging to Cloudflare D1 from Workers & Durable Objects",
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
