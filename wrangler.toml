@@ -22,7 +22,7 @@ directory = "./public"
 binding = "ASSETS"
 
 [[routes]]
-pattern = "logdodemo.tools.divort.io"
+pattern = "logdo-demo.stats.divort.io"
 custom_domain = true
 
 # This is the service binding to your existing logger Worker.
